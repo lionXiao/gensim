@@ -361,7 +361,7 @@ class WordEmbeddingsKeyedVectors(BaseKeyedVectors):
         """
         return super(WordEmbeddingsKeyedVectors, self).closer_than(w1, w2)
 
-    def most_similar(self, positive=None, negative=None, topn=10, restrict_vocab=None, indexer=None):
+    def most_similar(self, positive=None, negative=None, filter_arr=None, topn=10, restrict_vocab=None, indexer=None):
         """
         Find the top-N most similar words. Positive words contribute positively towards the
         similarity, negative words negatively.
@@ -400,7 +400,8 @@ class WordEmbeddingsKeyedVectors(BaseKeyedVectors):
             positive = []
         if negative is None:
             negative = []
-
+        if filter_arr is None:
+            filter_arr = []
         self.init_sims()
 
         if isinstance(positive, string_types) and not negative:
@@ -426,6 +427,8 @@ class WordEmbeddingsKeyedVectors(BaseKeyedVectors):
                 mean.append(weight * self.word_vec(word, use_norm=True))
                 if word in self.vocab:
                     all_words.add(self.vocab[word].index)
+        for word in filter_arr:
+            all_words.add(self.vocab[word].index)
         if not mean:
             raise ValueError("cannot compute similarity with no input")
         mean = matutils.unitvec(array(mean).mean(axis=0)).astype(REAL)
